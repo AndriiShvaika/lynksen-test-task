@@ -1,0 +1,114 @@
+.swiper {
+  width: 50%;
+  height: 80%;
+
+  @media screen and (max-width: 1200px) {
+    width: 80%;
+  }
+
+  @media screen and (max-width: 760px) {
+    width: 90%;
+    height: 90%;
+  }
+
+  &-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+    border-radius: 30px;
+
+    /* Center slide text vertically */
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &-button-next,
+  &-button-prev {
+    color: #7e5ae1 !important;
+    border-radius: 100%;
+    background: #fff;
+    padding: 20px 30px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+    @media screen and (max-width: 550px) {
+      height: 30px !important;
+      padding: 15px;
+
+      &::after {
+        font-size: 30px !important;
+      }
+    }
+  }
+
+  &-pagination-progressbar-fill {
+    background: #7e5ae1 !important;
+  }
+}
+
+.cat {
+  &-img-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 70%;
+    width: 100%;
+
+    @media screen and (max-width: 760px) {
+      height: 60%;
+    }
+
+    @media screen and (max-width: 400px) {
+      height: 50%;
+    }
+
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  &-name {
+    display: block;
+    margin-top: 25px;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  &-wrapper {
+    height: 30%;
+
+    @media screen and (max-width: 760px) {
+      height: 40%;
+    }
+
+    @media screen and (max-width: 400px) {
+      height: 50%;
+    }
+  }
+
+  &-content {
+    height: 45%;
+
+    @media screen and (max-width: 760px) {
+      height: 55%;
+    }
+  }
+
+  &-description {
+    padding: 0px 20px;
+  }
+}
+
+.swiper-slide button {
+  height: 50px;
+  background: linear-gradient(180deg, #9b7efa 0%, #7e5ae1 100%);
+  border-radius: 15px;
+  border: none;
+  color: #fff;
+  font-family: "Noto Sans", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
