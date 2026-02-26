@@ -1,31 +1,33 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getBreeds, getRandomImage } from '../../../redux/cats';
+import { getBreeds, getRandomImage } from '../../../redux/reducers/cats';
 import { RootState, useStoreDispatch } from '../../../redux/store';
 import { IBreedObject } from '../../../types';
 import { resolveBreedImageUrl } from '../utils/image';
 
 type BreedId = string;
-type BreedLoadingMap = Record<BreedId, boolean>;
+type BreedLoadingState = Record<BreedId, boolean>;
 
 export const useCatsCarousel = () => {
   const dispatch = useStoreDispatch();
 
-  const startRandomImageRequest = useCallback(
+  const startImageRequest = useCallback(
     (breedId: BreedId) => dispatch(getRandomImage(breedId)),
-    [dispatch]
+    [dispatch],
   );
-  type RandomImageRequest = ReturnType<typeof startRandomImageRequest>;
 
-  const randomImageRequestByBreedIdRef = useRef<
-    Record<BreedId, RandomImageRequest | undefined>
-  >({});
+  type RandomImageRequest = ReturnType<typeof startImageRequest>;
+
+  const activeImageRequestsRef = useRef<Map<BreedId, RandomImageRequest>>(
+    new Map(),
+  );
+
   const [loadingRandomImageByBreedId, setLoadingRandomImageByBreedId] =
-    useState<BreedLoadingMap>({});
+    useState<BreedLoadingState>({});
 
   const { breeds, breedsError, randomImageByBreedId } = useSelector(
-    (state: RootState) => state.cats
+    (state: RootState) => state.cats,
   );
 
   useEffect(() => {
@@ -33,55 +35,82 @@ export const useCatsCarousel = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    return () => {
-      const activeRequests = Object.values(randomImageRequestByBreedIdRef.current);
+    const activeImageRequests = activeImageRequestsRef.current;
 
-      activeRequests.forEach((request) => {
+    return () => {
+      activeImageRequests.forEach((request) => {
         request?.abort();
       });
 
-      randomImageRequestByBreedIdRef.current = {};
+      activeImageRequests.clear();
     };
   }, []);
 
-  const changeImage = useCallback(
-    (breedId: BreedId) => {
-      randomImageRequestByBreedIdRef.current[breedId]?.abort();
+  const setBreedImageLoading = useCallback(
+    (breedId: BreedId, isLoading: boolean) => {
       setLoadingRandomImageByBreedId((prev) => ({
         ...prev,
-        [breedId]: true,
+        [breedId]: isLoading,
       }));
+    },
+    [],
+  );
 
-      const request = startRandomImageRequest(breedId);
-      randomImageRequestByBreedIdRef.current[breedId] = request;
+  const abortImageRequest = useCallback((breedId: BreedId) => {
+    const request = activeImageRequestsRef.current.get(breedId);
+    request?.abort();
+    activeImageRequestsRef.current.delete(breedId);
+  }, []);
+
+  const trackImageRequest = useCallback(
+    (breedId: BreedId, request: RandomImageRequest) => {
+      activeImageRequestsRef.current.set(breedId, request);
 
       request.finally(() => {
-        if (randomImageRequestByBreedIdRef.current[breedId] === request) {
-          delete randomImageRequestByBreedIdRef.current[breedId];
-          setLoadingRandomImageByBreedId((prev) => ({
-            ...prev,
-            [breedId]: false,
-          }));
+        if (activeImageRequestsRef.current.get(breedId) === request) {
+          activeImageRequestsRef.current.delete(breedId);
+          setBreedImageLoading(breedId, false);
         }
       });
     },
-    [startRandomImageRequest]
+    [setBreedImageLoading],
   );
 
-  const getBreedImageUrl = (breed: IBreedObject) =>
-    resolveBreedImageUrl({
-      referenceImageId: breed.reference_image_id,
-      randomImageUrl: randomImageByBreedId[breed.id]?.url,
-    });
+  const getImage = useCallback(
+    (breedId: BreedId) => {
+      abortImageRequest(breedId);
+      setBreedImageLoading(breedId, true);
 
-  const isBreedImageLoading = (breedId: BreedId) =>
-    loadingRandomImageByBreedId[breedId] === true;
+      const request = startImageRequest(breedId);
+      trackImageRequest(breedId, request);
+    },
+    [
+      abortImageRequest,
+      setBreedImageLoading,
+      startImageRequest,
+      trackImageRequest,
+    ],
+  );
+
+  const getBreedImageUrl = useCallback(
+    (breed: IBreedObject) =>
+      resolveBreedImageUrl({
+        referenceImageId: breed.reference_image_id,
+        randomImageUrl: randomImageByBreedId[breed.id]?.url,
+      }),
+    [randomImageByBreedId],
+  );
+
+  const isBreedImageLoading = useCallback(
+    (breedId: BreedId) => loadingRandomImageByBreedId[breedId] === true,
+    [loadingRandomImageByBreedId],
+  );
 
   return {
     breeds,
     breedsError,
     isInitialLoading: breeds.length === 0 && !breedsError,
-    changeImage,
+    changeImage: getImage,
     getBreedImageUrl,
     isBreedImageLoading,
   };

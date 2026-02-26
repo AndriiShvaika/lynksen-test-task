@@ -1,9 +1,9 @@
-import { memo } from 'react';
-import ClipLoader from 'react-spinners/ClipLoader';
+import { Fragment, memo } from 'react';
 
 import { MAX_DESCRIPTION_LENGTH } from '../../../const';
 import { IBreedObject } from '../../../types';
 import { truncateText } from '../utils/text';
+import CatImage from './CatImage';
 
 interface CatCardProps {
   breed: IBreedObject;
@@ -19,19 +19,13 @@ const CatCard = ({
   onChangeImage,
 }: CatCardProps) => {
   return (
-    <>
-      <div className="cat-img-wrapper">
-        {isLoading ? (
-          <ClipLoader
-            size={200}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-            color={'#7e5ae1'}
-          />
-        ) : (
-          <img src={imageUrl} alt={`${breed.name} cat`} />
-        )}
-      </div>
+    <Fragment>
+      <CatImage
+        breed={breed}
+        imageUrl={imageUrl}
+        isLoading={isLoading}
+        onImageError={onChangeImage}
+      />
       <div className="cat-wrapper">
         <div className="cat-content">
           <span className="cat-name">{breed.name}</span>
@@ -41,7 +35,7 @@ const CatCard = ({
         </div>
         <button onClick={() => onChangeImage(breed.id)}>Change image</button>
       </div>
-    </>
+    </Fragment>
   );
 };
 

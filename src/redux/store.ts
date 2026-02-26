@@ -1,6 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { useDispatch } from "react-redux";
-import cats from "./cats";
+import { configureStore } from '@reduxjs/toolkit';
+import { useDispatch } from 'react-redux';
+import cats from './reducers/cats';
 
 export const store = configureStore({
   reducer: {

@@ -1,9 +1,11 @@
-import axios from "axios";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getBreedsApi, getRandomImageApi } from "../api/cats";
-import { IBreedObject, IImage } from "../types";
+import axios from 'axios';
 
-type RequestStatus = "idle" | "pending" | "succeeded" | "failed";
+import { filterBreeds } from '../utils/filterBreeds';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { getBreedsApi, getRandomImageApi } from '../../api/cats';
+import { IBreedObject, IImage } from '../../types';
+
+type RequestStatus = 'idle' | 'pending' | 'succeeded' | 'failed';
 const BREEDS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface ICatsState {
@@ -11,12 +13,12 @@ interface ICatsState {
   breedsStatus: RequestStatus;
   breedsError: string | null;
   breedsLastFetchedAt: number | null;
-  randomImageByBreedId: Record<string, IImage | undefined>;
+  randomImageByBreedId: Record<string, IImage>;
 }
 
 const initialState: ICatsState = {
   breeds: [],
-  breedsStatus: "idle",
+  breedsStatus: 'idle',
   breedsError: null,
   breedsLastFetchedAt: null,
   randomImageByBreedId: {},
@@ -31,55 +33,59 @@ const getErrorMessage = (error: unknown) => {
     return error.message;
   }
 
-  return "Something went wrong";
+  return 'Something went wrong';
 };
 
 export const getBreeds = createAsyncThunk<
   Array<IBreedObject>,
   { force?: boolean } | void,
   { state: { cats: ICatsState }; rejectValue: string }
->("getBreeds", async (_, { rejectWithValue }) => {
-  try {
-    const breeds = await getBreedsApi();
+>(
+  'getBreeds',
+  async (_, { rejectWithValue }) => {
+    try {
+      const breeds = await getBreedsApi();
 
-    return breeds;
-  } catch (error) {
-    return rejectWithValue(getErrorMessage(error));
-  }
-}, {
-  condition: (arg, { getState }) => {
-    const { cats } = getState();
-    const isForceRefresh = arg?.force ?? false;
-    const hasFreshCache =
-      cats.breedsLastFetchedAt !== null &&
-      Date.now() - cats.breedsLastFetchedAt < BREEDS_CACHE_TTL_MS;
-
-    if (isForceRefresh) {
-      return true;
+      return filterBreeds(breeds);
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error));
     }
-
-    if (cats.breedsStatus === "pending") {
-      return false;
-    }
-
-    return !hasFreshCache;
   },
-});
+  {
+    condition: (arg, { getState }) => {
+      const { cats } = getState();
+      const isForceRefresh = arg?.force ?? false;
+      const hasFreshCache =
+        cats.breedsLastFetchedAt !== null &&
+        Date.now() - cats.breedsLastFetchedAt < BREEDS_CACHE_TTL_MS;
+
+      if (isForceRefresh) {
+        return true;
+      }
+
+      if (cats.breedsStatus === 'pending') {
+        return false;
+      }
+
+      return !hasFreshCache;
+    },
+  },
+);
 
 export const getRandomImage = createAsyncThunk<
-  { breedId: string; image: IImage | undefined },
+  { breedId: string; image: IImage },
   string,
   { rejectValue: string }
->("getRandomImage", async (breedId, { rejectWithValue, signal }) => {
+>('getRandomImage', async (breedId, { rejectWithValue, signal }) => {
   try {
-    const images = await getRandomImageApi(breedId, signal);
+    const breedImages = await getRandomImageApi(breedId, signal);
 
     return {
       breedId,
-      image: images[0],
+      image: breedImages[0],
     };
   } catch (error) {
-    if (axios.isAxiosError(error) && error.code === "ERR_CANCELED") {
+    if (axios.isAxiosError(error) && error.code === 'ERR_CANCELED') {
       throw error;
     }
 
@@ -88,22 +94,22 @@ export const getRandomImage = createAsyncThunk<
 });
 
 const catsSlice = createSlice({
-  name: "cats",
+  name: 'cats',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(getBreeds.pending, (state) => {
-      state.breedsStatus = "pending";
+      state.breedsStatus = 'pending';
       state.breedsError = null;
     });
     builder.addCase(getBreeds.fulfilled, (state, action) => {
       state.breeds = action.payload;
-      state.breedsStatus = "succeeded";
+      state.breedsStatus = 'succeeded';
       state.breedsLastFetchedAt = Date.now();
     });
     builder.addCase(getBreeds.rejected, (state, action) => {
-      state.breedsStatus = "failed";
-      state.breedsError = action.payload ?? "Failed to fetch cat breeds";
+      state.breedsStatus = 'failed';
+      state.breedsError = action.payload ?? 'Failed to fetch cat breeds';
     });
 
     builder.addCase(getRandomImage.fulfilled, (state, action) => {

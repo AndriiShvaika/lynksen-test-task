@@ -1,7 +1,6 @@
-import axios from "axios";
-import { IBreedObject, IImage } from "../types";
-
-const CAT_API_BASE_URL = "https://api.thecatapi.com/v1";
+import axios from 'axios';
+import { IBreedObject, IImage } from '../types';
+import { CAT_API_BASE_URL } from '../const';
 
 const getRequestConfig = () => {
   if (!process.env.REACT_APP_API_KEY) {
@@ -10,7 +9,7 @@ const getRequestConfig = () => {
 
   return {
     headers: {
-      "x-api-key": process.env.REACT_APP_API_KEY,
+      'x-api-key': process.env.REACT_APP_API_KEY,
     },
   };
 };
@@ -18,7 +17,7 @@ const getRequestConfig = () => {
 export const getBreedsApi = async (): Promise<IBreedObject[]> => {
   const response = await axios.get<IBreedObject[]>(
     `${CAT_API_BASE_URL}/breeds`,
-    getRequestConfig()
+    getRequestConfig(),
   );
 
   return response.data;
@@ -26,15 +25,18 @@ export const getBreedsApi = async (): Promise<IBreedObject[]> => {
 
 export const getRandomImageApi = async (
   breedId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<IImage[]> => {
-  const response = await axios.get<IImage[]>(`${CAT_API_BASE_URL}/images/search`, {
-    ...getRequestConfig(),
-    signal,
-    params: {
-      breed_ids: breedId,
+  const response = await axios.get<IImage[]>(
+    `${CAT_API_BASE_URL}/images/search`,
+    {
+      ...getRequestConfig(),
+      signal,
+      params: {
+        breed_ids: breedId,
+      },
     },
-  });
+  );
 
   return response.data;
 };
