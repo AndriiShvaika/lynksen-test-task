@@ -4,9 +4,9 @@ export interface Weight {
 }
 
 export interface Image {
-  id: string;
-  width: number;
-  height: number;
+  id?: string;
+  width?: number;
+  height?: number;
   url: string;
 }
 
@@ -47,10 +47,7 @@ export interface IBreedObject {
   short_legs: number;
   wikipedia_url: string;
   hypoallergenic: number;
-  reference_image_id: string;
-  image: Image;
+  reference_image_id?: string;
 }
 
-export interface IImage {
-  url: string;
-}
+export type IImage = Image;

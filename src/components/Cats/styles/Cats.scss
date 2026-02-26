@@ -1,6 +1,45 @@
+.cats-initial-loader {
+  width: 50%;
+  height: 80%;
+  background: #fff;
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media screen and (max-width: 1200px) {
+    width: 80%;
+  }
+
+  @media screen and (max-width: 760px) {
+    width: 90%;
+    height: 90%;
+  }
+}
+
+.cats-fetch-error {
+  width: 50%;
+  padding: 24px;
+  background: #fff;
+  border-radius: 30px;
+  text-align: center;
+  color: #cc1f1a;
+  font-size: 16px;
+  line-height: 1.5;
+
+  @media screen and (max-width: 1200px) {
+    width: 80%;
+  }
+
+  @media screen and (max-width: 760px) {
+    width: 90%;
+  }
+}
+
 .swiper {
   width: 50%;
   height: 80%;
+  border-radius: 30px;
 
   @media screen and (max-width: 1200px) {
     width: 80%;
@@ -107,7 +146,7 @@
   border-radius: 15px;
   border: none;
   color: #fff;
-  font-family: "Noto Sans", sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 16px;
   cursor: pointer;
   margin-top: 10px;
