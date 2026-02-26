@@ -1,4 +1,4 @@
-Link to the deployed test task: https://calm-pithivier-674c4c.netlify.app/
+Link to the deployed test task: https://lynksen-test-task.netlify.app
 
 ## Available Scripts
 
